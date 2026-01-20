@@ -7,10 +7,11 @@
 #include <iostream>
 #include <cstring> 
 
-#include "Network_stack.h"
-
-Network_stack Network_stack::create_entry_point(const std::string& dev_name)
+#include "Network_Interface.h"
+#include "common.h"
+Network_Interface Network_Interface::create_entry_point(const std::string& dev_name)
 {
+    LOG("Creating TUN/TAP device");
     struct ifreq ifr;
     int fd, err;
 
@@ -37,5 +38,26 @@ Network_stack Network_stack::create_entry_point(const std::string& dev_name)
         return err;
     }
 
-    return Network_stack(fd);
+    return Network_Interface(fd);
+}
+
+Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
+{
+    size_t BUFF_LEN {2048};
+    char* buff = (char*) calloc(sizeof(char), BUFF_LEN);
+    if (!buff)
+    {
+        perror("malloc");
+        exit(1);
+    }
+    
+    nread = read(m_tap_fd, buff, BUFF_LEN);
+    if (nread < 0) {
+        perror("Reading from interface");
+        free(buff);
+        exit(1);
+    }
+
+
+    return reinterpret_cast<Ethernet::Frame*>(BUFF_LEN);
 }
