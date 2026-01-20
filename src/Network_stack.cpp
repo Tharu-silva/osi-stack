@@ -7,9 +7,9 @@
 #include <iostream>
 #include <cstring> 
 
-#include "Network_entry.h"
+#include "Network_stack.h"
 
-Network_entry Network_entry::create_entry_point(const std::string& dev_name)
+Network_stack Network_stack::create_entry_point(const std::string& dev_name)
 {
     struct ifreq ifr;
     int fd, err;
@@ -37,5 +37,5 @@ Network_entry Network_entry::create_entry_point(const std::string& dev_name)
         return err;
     }
 
-    return Network_entry(fd);
+    return Network_stack(fd);
 }
