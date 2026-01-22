@@ -1,3 +1,3 @@
 #pragma once
 
-#define LOG(msg) std::cout << msg << "[LOG]" << std::endl
+#define LOG(msg) std::cout << "[LOG] " << msg << std::endl

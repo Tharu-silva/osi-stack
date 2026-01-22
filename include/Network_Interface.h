@@ -13,7 +13,7 @@ public:
     //Creates a network entry point and associates a tap device
     static Network_Interface create_entry_point(const std::string& dev_name);
 
-    Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread);
+    Ethernet::Frame* read_frame(ssize_t& nread);
 
 private: 
     int m_tap_fd; 

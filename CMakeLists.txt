@@ -1,20 +1,19 @@
 cmake_minimum_required(VERSION 3.10)
-
 # Project name and version
-project(MyProject VERSION 1.0)
-
+project(main VERSION 1.0)
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Include directories
-include_directories(${PROJECT_SOURCE_DIR}/includes)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 # Collect all source files from /src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-
 # Add the main executable
 add_executable(${PROJECT_NAME} 
     main.cpp
     ${SOURCES}
 )
+
+# Add include directories
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)

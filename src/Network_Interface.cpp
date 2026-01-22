@@ -9,13 +9,14 @@
 
 #include "Network_Interface.h"
 #include "common.h"
+
 Network_Interface Network_Interface::create_entry_point(const std::string& dev_name)
 {
     LOG("Creating TUN/TAP device");
     struct ifreq ifr;
     int fd, err;
 
-    if( (fd = open("/dev/net/tap", O_RDWR)) < 0 ) {
+    if( (fd = open("/dev/net/tun", O_RDWR)) < 0 ) {
         std::cerr << "Cannot open TUN/TAP device" << '\n';
         exit(1);
     }
@@ -38,11 +39,14 @@ Network_Interface Network_Interface::create_entry_point(const std::string& dev_n
         return err;
     }
 
+    LOG("Created TAP device");
     return Network_Interface(fd);
 }
 
 Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
 {
+    LOG("Reading from Network interface");
+
     size_t BUFF_LEN {2048};
     char* buff = (char*) calloc(sizeof(char), BUFF_LEN);
     if (!buff)
@@ -58,6 +62,6 @@ Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
         exit(1);
     }
 
-
-    return reinterpret_cast<Ethernet::Frame*>(BUFF_LEN);
+    LOG("Read from network interface");
+    return reinterpret_cast<Ethernet::Frame*>(buff);
 }
