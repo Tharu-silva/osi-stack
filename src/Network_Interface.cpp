@@ -6,6 +6,8 @@
 #include <string>
 #include <iostream>
 #include <cstring> 
+#include <arpa/inet.h>
+
 
 #include "Network_Interface.h"
 #include "common.h"
@@ -36,7 +38,7 @@ Network_Interface Network_Interface::create_entry_point(const std::string& dev_n
     if( (err = ioctl(fd, TUNSETIFF, (void *) &ifr)) < 0 ){
         std::cerr << "ERR: Could not ioctl tun: " << strerror(errno) << '\n';
         close(fd);
-        return err;
+        exit(1);
     }
 
     LOG("Created TAP device");
@@ -45,8 +47,6 @@ Network_Interface Network_Interface::create_entry_point(const std::string& dev_n
 
 Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
 {
-    LOG("Reading from Network interface");
-
     size_t BUFF_LEN {2048};
     char* buff = (char*) calloc(sizeof(char), BUFF_LEN);
     if (!buff)
@@ -62,6 +62,8 @@ Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
         exit(1);
     }
 
-    LOG("Read from network interface");
-    return reinterpret_cast<Ethernet::Frame*>(buff);
+    Ethernet::Frame* read_frame = reinterpret_cast<Ethernet::Frame*>(buff);
+    //Convert from network to host byte order
+    read_frame->ethertype = ntohs(read_frame->ethertype);
+    return read_frame;
 }
