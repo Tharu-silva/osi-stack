@@ -21,7 +21,7 @@ Ethernet::Frame Data_link::process_packet(Ethernet::Frame* raw_frame, uint16_t f
             break; 
         }
         default: {
-            // LOG("Ethernet payload type is unsupported");
+            LOG("Ethernet payload type is unsupported");
         }
     }
 
@@ -31,7 +31,7 @@ Ethernet::Frame Data_link::process_packet(Ethernet::Frame* raw_frame, uint16_t f
 //Parse ARP frame and update ip_to_mac cache
 void Data_link::handle_arp(ARP::Frame* arp_packet, uint16_t arp_len)
 {
-    
+
     return;
 }
 
