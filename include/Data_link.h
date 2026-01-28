@@ -52,6 +52,7 @@ namespace ARP
         uint16_t opcode;
         ARP::arp_ipv4 data;
     } __attribute__((packed));   
+
 }
 
 
@@ -60,10 +61,25 @@ class Data_link
 public:
     Data_link() = default;
     
-    Ethernet::Frame process_packet(Ethernet::Frame* raw_packet, uint16_t frame_size);
+    Ethernet::Frame* process_packet(Ethernet::Frame* raw_packet, uint16_t frame_size);
+    
+    //Converts mac from it's raw size to 
+    static inline mac_t convert_mac(unsigned char* raw_mac)
+    {
+        mac_t res {};
+        //Big-endian (Network byte order)
+        for (int i = 0; i < 6; ++i)
+        {
+            res = (res << 8) | raw_mac[i];
+        }
+        return res; 
+    }
+
+    //Swaps dmac and smac
+    void swap_mac(unsigned char* dmac, unsigned char* smac);
 private:
     std::unordered_map<ipv4_t, mac_t> ip_to_mac {};
 
-    void handle_arp(ARP::Frame* arp_packet, uint16_t arp_len);
+    ARP::Frame* Data_link::handle_arp(ARP::Frame* arp_packet, uint16_t arp_len);
 };
 

@@ -12,8 +12,14 @@ int main()
 
     while (true)
     {
-        Ethernet::Frame* eth_frame {ni.read_frame(frame_len)};
-        dl.process_packet(eth_frame, frame_len);
+        Ethernet::Frame* input_frame {ni.read_frame(frame_len)};
+        Ethernet::Frame* output_frame {dl.process_packet(input_frame, frame_len)};
+
+        //Write output frame
+
+        //Free frames
+        free(input_frame);
+        free(output_frame);
     }
 
     return 0;
