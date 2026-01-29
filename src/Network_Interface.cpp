@@ -63,7 +63,20 @@ Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
     }
 
     Ethernet::Frame* read_frame = reinterpret_cast<Ethernet::Frame*>(buff);
-    //Convert from network to host byte order
-    read_frame->ethertype = ntohs(read_frame->ethertype);
+
     return read_frame;
+}
+
+ssize_t Network_Interface::respond_frame(Ethernet_Wrapper& out_eth)
+{
+    ssize_t nwrite {}; 
+    nwrite = write(m_tap_fd, out_eth.frame, out_eth.frame_sz);
+    if (nwrite < 0)
+    {
+        perror("Writing to interface");
+        exit(1);
+    }
+
+    
+    return nwrite;
 }

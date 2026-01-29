@@ -5,12 +5,9 @@
 #include <string.h>
 #include <net/if_arp.h>
 
-Ethernet::Frame* Data_link::process_packet(Ethernet::Frame* raw_frame, uint16_t frame_size)
+void Data_link::process_packet(Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth)
 {
-    //Deep copy input frame
-    Ethernet::Frame* out_eth {};
-
-    switch (Ethernet::payload_type(raw_frame))
+    switch (Ethernet::payload_type(input_eth.frame))
     {
         using namespace Ethernet;
         case Payloads::IPV4: {
@@ -20,23 +17,33 @@ Ethernet::Frame* Data_link::process_packet(Ethernet::Frame* raw_frame, uint16_t 
         case Payloads::ARP: {
             LOG("Ethernet payload is an ARP packet");
 
-            uint16_t arp_len {Ethernet::payload_len(raw_frame, frame_size)};
+            uint16_t arp_len {Ethernet::payload_len(input_eth.frame_sz)};
             ARP::Frame* out_arp = Data_link::handle_arp(
-                        reinterpret_cast<ARP::Frame*>(raw_frame->payload), arp_len);
+                        reinterpret_cast<ARP::Frame*>(input_eth.frame->payload), arp_len);
             
             //Don't construct reply frame if out_arp is NULL
             if (!out_arp) { break; }
 
             //Copy input eth frame
-            out_eth = (Ethernet::Frame*) malloc(sizeof(Ethernet::Frame) + arp_len);
-            memcpy(out_eth, raw_frame, sizeof(Ethernet::Frame)); //Copy headers
+            Ethernet::Frame* out_frame = (Ethernet::Frame*) malloc(
+                                                sizeof(Ethernet::Frame) + arp_len);
+            memcpy(out_frame, input_eth.frame, sizeof(Ethernet::Frame)); //Copy headers
                 
-            //Swap dmac and smac
-            Data_link::swap_mac(out_eth->dmac, out_eth->smac);
+            //Set eth frame dmac and smac
+            for (int i = 0; i < 6; ++i)
+            {
+                out_frame->dmac[i] = out_arp->data.dmac[i];
+                out_frame->smac[i] = out_arp->data.smac[i];
+            }
 
             //Set the payload as out_arp
-            memcpy(out_eth->payload, out_arp, arp_len);
+            memcpy(out_frame->payload, out_arp, arp_len);
             free(out_arp);
+
+            //Out_eth owns out_frame
+            out_eth.frame = out_frame;
+            out_eth.frame_sz = sizeof(Ethernet::Frame) + arp_len; 
+
             break; 
         }
         default: {
@@ -44,7 +51,7 @@ Ethernet::Frame* Data_link::process_packet(Ethernet::Frame* raw_frame, uint16_t 
         }
     }
 
-    return out_eth; //NULL if nothing to send back
+    return;
 }
 
 //Parse ARP frame and update ip_to_mac cache
@@ -106,7 +113,7 @@ ARP::Frame* Data_link::handle_arp(ARP::Frame* arp_packet, uint16_t arp_len)
 
 Ethernet::Payloads Ethernet::payload_type(Ethernet::Frame* frame)
 {
-    switch (frame->ethertype)
+    switch (ntohs(frame->ethertype))
     {
         case ETH_P_IP:
             return Payloads::IPV4; 

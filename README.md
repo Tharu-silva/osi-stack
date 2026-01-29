@@ -1,7 +1,7 @@
 OSI Stack: 
 
-- [ ] Physical layer
-- [ ] Data link layer (In progress)
+- [ ] Physical layer (N/A)
+- [x] Data link layer (In progress)
 - [ ] Network layer (In progress)
 - [ ] Transport Layer (In progress)
 - [ ] Session layer

@@ -13,13 +13,18 @@ int main()
     while (true)
     {
         Ethernet::Frame* input_frame {ni.read_frame(frame_len)};
-        Ethernet::Frame* output_frame {dl.process_packet(input_frame, frame_len)};
+        
+        Ethernet_Wrapper input_eth {input_frame, static_cast<size_t>(frame_len)};
+        Ethernet_Wrapper out_eth {};
 
-        //Write output frame
+        dl.process_packet(input_eth, out_eth);
+        
 
-        //Free frames
-        free(input_frame);
-        free(output_frame);
+        //Write output frame if not null
+        if (out_eth.frame)
+        {
+            ni.respond_frame(out_eth);
+        }
     }
 
     return 0;
