@@ -25,8 +25,8 @@ ARP
     simply implementation. 
 
     ARP techinically has 4 different formats signalled by the opcode in the arp
-    header. But RARP request and reply have been depreciated and the code only 
-    handle ARP request and reply. 
+    header. But RARP request and reply have been depreciated and the logic only 
+    handles ARP request and replies. 
 
     ARP handling algorithm:
         ?Do I have the hardware type in hwtype?
