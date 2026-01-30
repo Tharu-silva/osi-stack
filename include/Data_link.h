@@ -9,7 +9,6 @@ typedef uint32_t ipv4_t;
 
 namespace Ethernet
 {
-
     enum class Payloads
     {
         IPV4, 
@@ -33,21 +32,6 @@ namespace Ethernet
     //Returns the type of the ethernet payload
     Ethernet::Payloads payload_type(Ethernet::Frame* frame);
 } 
-
-//RAII-compliant Wrapper for an ethernet frame
-class Ethernet_Wrapper
-{
-public:
-    Ethernet_Wrapper() = default; 
-    Ethernet_Wrapper(Ethernet::Frame* frame, size_t frame_sz)
-        : frame(frame), frame_sz (frame_sz) {}
-
-    Ethernet::Frame* frame {NULL};
-    size_t frame_sz {};
-
-    //Destructor frees frame
-private: 
-};
 
 namespace ARP 
 {
@@ -77,7 +61,7 @@ class Data_link
 public:
     Data_link() = default;
     
-    void process_packet(Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth);
+    void process_packet(const Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth);
     
     //Converts mac from it's raw size to 
     static inline mac_t convert_mac(unsigned char* raw_mac)
@@ -92,7 +76,7 @@ public:
     }
 
     //Swaps dmac and smac
-    void swap_mac(unsigned char* dmac, unsigned char* smac);
+    static void swap_mac(unsigned char* dmac, unsigned char* smac);
 private:
     std::unordered_map<ipv4_t, mac_t> ip_to_mac {};
 

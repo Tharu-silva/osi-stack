@@ -2,6 +2,7 @@
 
 #include <string>
 #include "Data_link.h"
+#include "Ethernet_Wrapper.h"
 
 //Class encapsulates a network entry point
 class Network_Interface

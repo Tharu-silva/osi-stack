@@ -1,17 +1,25 @@
-#include "Data_link.h"
-#include "common.h"
 #include <iostream>
 #include <arpa/inet.h>
 #include <string.h>
 #include <net/if_arp.h>
 
-void Data_link::process_packet(Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth)
+#include "Data_link.h"
+#include "common.h"
+#include "Ethernet_Wrapper.h"
+#include "Network.h"
+#include "IP_Wrapper.h"
+
+void Data_link::process_packet(const Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth)
 {
     switch (Ethernet::payload_type(input_eth.frame))
     {
         using namespace Ethernet;
         case Payloads::IPV4: {
             LOG("Ethernet payload is an IPv4 packet");
+
+            //Create IP wrapper from input_eth
+            //Call Network::process_packet with input_ip, and capture res in out_ip
+            //Transfer ownership of ip frame to eth wrapper (out_eth)
             break;
         }
         case Payloads::ARP: {
