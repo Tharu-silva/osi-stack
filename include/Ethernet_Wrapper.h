@@ -17,6 +17,6 @@ public:
     //Destructor frees frame
     ~Ethernet_Wrapper();
     //Transfer ownership
-    void transfer_payload(IP_Wrapper& ip_wrp);
+    void copy_payload(IP_Wrapper& ip_wrp);
 private: 
 };

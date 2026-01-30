@@ -55,7 +55,6 @@ namespace ARP
 
 }
 
-
 class Data_link 
 {
 public:
