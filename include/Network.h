@@ -9,12 +9,7 @@ namespace IP
 } // namespace IP
 
 
-class Network 
-{
-public:
-    Network() = default;
-    
+namespace Network 
+{    
     void process_packet(const IP_Wrapper& input_ip, IP_Wrapper& out_ip);
-
-private:
 };

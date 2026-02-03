@@ -28,9 +28,6 @@ namespace Ethernet
     {
         return frame_sz - 14; 
     }
-
-    //Returns the type of the ethernet payload
-    Ethernet::Payloads payload_type(Ethernet::Frame* frame);
 } 
 
 namespace ARP 
@@ -55,15 +52,12 @@ namespace ARP
 
 }
 
-class Data_link 
-{
-public:
-    Data_link() = default;
-    
+namespace Data_link 
+{    
     void process_packet(const Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth);
     
     //Converts mac from it's raw size to 
-    static inline mac_t convert_mac(unsigned char* raw_mac)
+    inline mac_t convert_mac(unsigned char* raw_mac)
     {
         mac_t res {};
         //Big-endian (Network byte order)
@@ -75,10 +69,6 @@ public:
     }
 
     //Swaps dmac and smac
-    static void swap_mac(unsigned char* dmac, unsigned char* smac);
-private:
-    std::unordered_map<ipv4_t, mac_t> ip_to_mac {};
-
-    ARP::Frame* handle_arp(ARP::Frame* arp_packet, uint16_t arp_len);
+    void swap_mac(unsigned char* dmac, unsigned char* smac);
 };
 

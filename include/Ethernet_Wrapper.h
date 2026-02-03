@@ -14,6 +14,9 @@ public:
     Ethernet::Frame* frame {NULL};
     size_t frame_sz {};
 
+    //Returns the type of the ethernet payload
+    Ethernet::Payloads payload_type() const;
+
     //Destructor frees frame
     ~Ethernet_Wrapper();
     //Transfer ownership

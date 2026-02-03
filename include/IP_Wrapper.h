@@ -8,9 +8,7 @@ class IP_Wrapper
 {
 public:
     IP_Wrapper() = default; 
-    IP_Wrapper(IP::Frame* frame, size_t frame_sz)
-        : frame(frame), frame_sz (frame_sz) {}
-
+    IP_Wrapper(const Ethernet_Wrapper& eth, size_t frame_sz);
     IP::Frame* frame {NULL};
     size_t frame_sz {};
 
