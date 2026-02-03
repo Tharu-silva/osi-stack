@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <cstring> 
+#include <memory>
 #include <arpa/inet.h>
 
 #include "Network_Interface.h"
@@ -44,32 +45,33 @@ Network_Interface Network_Interface::create_entry_point(const std::string& dev_n
     return Network_Interface(fd);
 }
 
-Ethernet::Frame* Network_Interface::read_frame(ssize_t& nread)
+Ethernet_Wrapper Network_Interface::read_frame(size_t& nread)
 {
-    size_t BUFF_LEN {2048};
-    char* buff = (char*) calloc(sizeof(char), BUFF_LEN);
+    constexpr size_t BUFF_LEN {2048};
+    auto buff = std::make_unique<char[]>(BUFF_LEN);
     if (!buff)
     {
         perror("malloc");
         exit(1);
     }
     
-    nread = read(m_tap_fd, buff, BUFF_LEN);
+    nread = read(m_tap_fd, buff.get(), BUFF_LEN);
     if (nread < 0) {
         perror("Reading from interface");
-        free(buff);
         exit(1);
     }
 
-    Ethernet::Frame* read_frame = reinterpret_cast<Ethernet::Frame*>(buff);
+    auto frame_ptr = std::unique_ptr<Ethernet::Frame>(
+    reinterpret_cast<Ethernet::Frame*>(buff.release())
+    );
 
-    return read_frame;
+    return Ethernet_Wrapper(std::move(frame_ptr), nread);
 }
 
 ssize_t Network_Interface::respond_frame(Ethernet_Wrapper& out_eth)
 {
     ssize_t nwrite {}; 
-    nwrite = write(m_tap_fd, out_eth.frame, out_eth.frame_sz);
+    nwrite = write(m_tap_fd, out_eth.frame.get(), out_eth.frame_sz);
     if (nwrite < 0)
     {
         perror("Writing to interface");

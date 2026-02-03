@@ -54,7 +54,7 @@ namespace ARP
 
 namespace Data_link 
 {    
-    void process_packet(const Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth);
+    Ethernet_Wrapper process_packet(const Ethernet_Wrapper& input_eth);
     
     //Converts mac from it's raw size to 
     inline mac_t convert_mac(unsigned char* raw_mac)

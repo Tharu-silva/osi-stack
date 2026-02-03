@@ -74,7 +74,7 @@ namespace Data_link
     } 
     
 
-    void process_packet(const Ethernet_Wrapper& input_eth, Ethernet_Wrapper& out_eth)
+    Ethernet_Wrapper process_packet(const Ethernet_Wrapper& input_eth)
     {
         switch (input_eth.payload_type())
         {
@@ -85,7 +85,6 @@ namespace Data_link
                 //Create IP wrapper from input_eth
                 size_t ip_sz {Ethernet::payload_len(input_eth.frame_sz)};
                 IP_Wrapper ip_in {input_eth, ip_sz};
-                
                 IP_Wrapper ip_out {};
                 Network::process_packet(ip_in, ip_out);
                 
@@ -112,28 +111,8 @@ namespace Data_link
                 
                 //Don't construct reply frame if out_arp is NULL
                 if (!out_arp) { break; }
-
-                //Copy input eth frame
-                Ethernet::Frame* out_frame = (Ethernet::Frame*) malloc(
-                                                    sizeof(Ethernet::Frame) + arp_len);
-                memcpy(out_frame, input_eth.frame, sizeof(Ethernet::Frame)); //Copy headers
-                    
-                //Set eth frame dmac and smac
-                for (int i = 0; i < 6; ++i)
-                {
-                    out_frame->dmac[i] = out_arp->data.dmac[i];
-                    out_frame->smac[i] = out_arp->data.smac[i];
-                }
-
-                //Set the payload as out_arp
-                memcpy(out_frame->payload, out_arp, arp_len);
-                free(out_arp);
-
-                //Out_eth owns out_frame
-                out_eth.frame = out_frame;
-                out_eth.frame_sz = sizeof(Ethernet::Frame) + arp_len; 
-
-                break; 
+                //TODO: free out arp, or convert out_arp to unique ptrs
+                return Ethernet_Wrapper(input_eth, out_arp);            
             }
             default: {
                 LOG("Ethernet payload type is unsupported");
