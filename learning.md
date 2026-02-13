@@ -58,3 +58,29 @@ IP
     IP Packets have a fixed size header of 20 bytes. Then there are var length IP 
     options if ihl > 5, then comes the actual payload. We can think of the ip options as part
     of the payload, or simply as a header to the payload.
+
+    Fragment reassembly algo would check if MF=0, then it would calc the total size of the datagram,
+    Then it would lookup the datagram in some map and check if all byte ranges are covered. If not then does nothing
+    otherwise it processes. If We get a MF=1 fragment we check if the size of datagram is known. If so, then check byte 
+    ranges have been fuffiled and if this fragment completes it. If so then we process otherwise not. 
+
+    Best DS to represent the recieved bytes of a datagram? 
+        We can MAP datagram saddr, ID to a [ptr, recv, total_size] triple. 
+        Where 
+            ptr is a ptr to a vector containing each datagram in order (each time new frontier packet is observed we extend the vector)
+
+            recv is the total number of bytes recieved
+
+            total_size is the total size of the datagram or -1 if unknown
+
+    Completion conditiosn
+        MF==1 AND bytes_recieved == total_size
+        OR
+        MF==0 AND MF=1 recieved AND bytes_recieved == total_size
+
+    IP Packet parsing algorithm:
+        Is this the last necessary packet of a datagram?
+        Yes:
+            Lookup the rest of the packets in the datagram map
+        No:
+            Add this packet to the datagram accumulator data structure and respond with nothing
