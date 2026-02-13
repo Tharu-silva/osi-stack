@@ -8,7 +8,6 @@ int main()
 
     size_t frame_len {};
     
-
     while (true)
     {
         Ethernet_Wrapper input_eth {ni.read_frame(frame_len)};

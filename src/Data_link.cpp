@@ -85,29 +85,19 @@ namespace Data_link
                 //Create IP wrapper from input_eth
                 size_t ip_sz {Ethernet::payload_len(input_eth.frame_sz)};
                 IP_Wrapper ip_in {input_eth, ip_sz};
-                IP_Wrapper ip_out {};
-                Network::process_packet(ip_in, ip_out);
+                IP_Wrapper ip_out {Network::process_packet(ip_in)};
                 
                 //Nothing to respond
-                if (!ip_out.frame) { break; }
-
-                //Assemble eth frame
-                Ethernet::Frame* out_frame = (Ethernet::Frame*) malloc(
-                                            sizeof(Ethernet::Frame) + ip_sz);
-                memcpy(out_frame, input_eth.frame, sizeof(Ethernet::Frame)); //Copy headers
-                //Transfer ownership of IP packet
-                out_eth.copy_payload();
-
-                //Call Network::process_packet with input_ip, and capture res in out_ip
-                //Transfer ownership of ip frame to eth wrapper (out_eth)
-                break;
+                if (!ip_out.frame()) { break; }
+                
+                return Ethernet_Wrapper(input_eth, ip_out);
             }
             case Payloads::ARP: {
                 LOG("Ethernet payload is an ARP packet");
 
                 uint16_t arp_len {Ethernet::payload_len(input_eth.frame_sz)};
                 ARP::Frame* out_arp = Data_link::handle_arp(
-                            reinterpret_cast<ARP::Frame*>(input_eth.frame->payload), arp_len);
+                            reinterpret_cast<ARP::Frame*>(input_eth.frame()->payload), arp_len);
                 
                 //Don't construct reply frame if out_arp is NULL
                 if (!out_arp) { break; }

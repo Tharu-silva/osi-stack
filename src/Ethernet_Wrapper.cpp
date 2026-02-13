@@ -5,19 +5,20 @@
 
 #include "Ethernet_Wrapper.h"
 #include "Data_link.h"
+#include "common.h"
 
-void Ethernet_Wrapper::copy_payload(IP_Wrapper &ip_wrp)
+void Ethernet_Wrapper::copy_payload(IP_Wrapper& ip_wrp)
 {
     //Copy payload
-    memcpy(frame->payload, ip_wrp.frame.get(), ip_wrp.frame_sz);
+    memcpy(this->frame()->payload, ip_wrp.frame(), ip_wrp.frame_sz);
 }
 
 
 Ethernet::Payloads Ethernet_Wrapper::payload_type() const
 {
-    if (!frame) { return Ethernet::Payloads::maxPayloads; }
+    if (!this->frame()) { return Ethernet::Payloads::maxPayloads; }
 
-    switch (ntohs(frame->ethertype))
+    switch (ntohs(this->frame()->ethertype))
     {
         case ETH_P_IP:
             return Ethernet::Payloads::IPV4; 
@@ -29,27 +30,26 @@ Ethernet::Payloads Ethernet_Wrapper::payload_type() const
 }
 
 
-//Copy constructor will copy headers from eth_wrap and payload from arg
-Ethernet_Wrapper::Ethernet_Wrapper(const Ethernet_Wrapper& eth_wrp, ARP::Frame* payload)
+//Constructor will construct a valid eth wrapper from the corresponding input frame + output payload
+Ethernet_Wrapper::Ethernet_Wrapper(const Ethernet_Wrapper& input_eth, ARP::Frame* payload)
     : frame_sz (sizeof(Ethernet::Frame) + sizeof(ARP::Frame))
 {
     //Copy headers
-    if (eth_wrp.frame)
+    Ethernet::Frame* input_frame {input_eth.frame()};
+    if (input_frame)
     {
         // Allocate new buffer
         auto buff = std::make_unique<char[]>(frame_sz);
         auto new_frame = reinterpret_cast<Ethernet::Frame*>(buff.get());
         
-        // Copy headers field-by-field
-        memcpy(new_frame->dmac, eth_wrp.frame->dmac, 6);
-        memcpy(new_frame->smac, eth_wrp.frame->smac, 6);
-        new_frame->ethertype = eth_wrp.frame->ethertype;
+        // Copy & Swap headers field-by-field
+        memcpy(new_frame->dmac, input_frame->smac, 6);
+        memcpy(new_frame->smac, my_mac, 6);
+        new_frame->ethertype = input_frame->ethertype;
         
         //Copy payload
         memcpy(new_frame->payload, payload, sizeof(ARP::Frame));
         
-        frame = std::unique_ptr<Ethernet::Frame>(
-            reinterpret_cast<Ethernet::Frame*>(buff.release())
-        );
+        frame_buff = std::move(buff);
     }
 }

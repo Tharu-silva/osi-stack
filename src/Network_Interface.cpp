@@ -61,17 +61,13 @@ Ethernet_Wrapper Network_Interface::read_frame(size_t& nread)
         exit(1);
     }
 
-    auto frame_ptr = std::unique_ptr<Ethernet::Frame>(
-    reinterpret_cast<Ethernet::Frame*>(buff.release())
-    );
-
-    return Ethernet_Wrapper(std::move(frame_ptr), nread);
+    return Ethernet_Wrapper(std::move(buff), nread);
 }
 
 ssize_t Network_Interface::respond_frame(Ethernet_Wrapper& out_eth)
 {
     ssize_t nwrite {}; 
-    nwrite = write(m_tap_fd, out_eth.frame.get(), out_eth.frame_sz);
+    nwrite = write(m_tap_fd, out_eth.frame(), out_eth.frame_sz);
     if (nwrite < 0)
     {
         perror("Writing to interface");

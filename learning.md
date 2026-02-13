@@ -52,3 +52,9 @@ ARP
                 Set the opcode field to ARP_REPLY
                 Send the packet to the (new) target hardware address on
                     the same hardware on which the request was received.
+
+
+IP 
+    IP Packets have a fixed size header of 20 bytes. Then there are var length IP 
+    options if ihl > 5, then comes the actual payload. We can think of the ip options as part
+    of the payload, or simply as a header to the payload.
